@@ -5,7 +5,7 @@ var util = require("./util");
 var config = {
   numprocesses: 15,// processos pra criar e botar na fila
   strategies: ["first fit", "best fit", "worst fit", "next fit"],//estratégias de alocação
-  currentstrategy: 1,// estratégia selecionada'
+  currentstrategy: 0,// estratégia selecionada'
   memorysizemb: 100,// tamanho da memória de simulação
   sistopmemorymb: 10,// memória gasta com o SO
   processmemoryrangemb: [1, 35],// ranges de tamanho de memória dos processos
@@ -64,14 +64,16 @@ var simulation = {
       memostart: simulation.memorymap.memoend + 1,
       memoend: config.memorysizemb - 1
     };
+    // last used node
+    simulation.lastnode=simulation.memorymap;
   },
   step: function () {
     if (simulation.running) {
       var proc = simulation.processqueue.pop()
       if (proc) {
         if (simulation.lastallocation + proc.creation_time <= new Date().getTime()) {
+          proc.created_at = new Date(proc.creation_time + new Date().getTime());
           if(util.allocate(proc,simulation)){
-            proc.created_at = new Date(proc.creation_time + new Date().getTime());
             simulation.lastallocation = proc.created_at.getTime();
             console.log(proc)
           }else{

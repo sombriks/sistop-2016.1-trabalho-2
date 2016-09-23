@@ -22,7 +22,20 @@ var utilities = {
   },
   firstfit: function (proc, simu) {
     console.log("using first fit:");
-    return 1;
+    // start from the begining of the memory map
+    var next = simu.memorymap;
+    while (next) {
+      if (next.label == "free") {
+        if (next.memoend - next.memostart >= proc.memoryused) {
+          utilities.mapproc(proc, simu, next);
+          simu.lastnode = next;
+          return 1;
+        }
+      }
+      next = next.next;
+    }
+    console.log("there is no available memory");
+    return 0;
   },
   bestfit: function (proc, simu) {
     console.log("using best fit:");
@@ -35,6 +48,28 @@ var utilities = {
   nextfit: function (proc, simu) {
     console.log("using next fit:");
     return 1;
+  },
+  mapproc: function (proc, simu, nodemap) {
+    // assume nodemap is free and proc fits on the node
+    nodemap.label = "proc-" + proc.created_at;
+    // allocate
+    var i = nodemap.memostart + proc.memoryused;
+    while (i--) {
+      simu.physicalmemory[i].free = false;
+    }
+    // check if there is remaining memory
+    if (nodemap.memoend > nodemap.memostart + proc.memoryused) {
+      var newnode = {
+        memostart: nodemap.memostart + proc.memoryused,
+        memoend: nodemap.memoend,
+        label: "free",
+      };
+      nodemap.memoend = nodemap.memostart + proc.memoryused - 1;
+      // time to link it back
+      if (nodemap.next)
+        newnode.next = nodemap.next;
+      nodemap.next = newnode;
+    }
   }
 }
 
