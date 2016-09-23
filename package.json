@@ -12,7 +12,9 @@
     "budo": "^9.2.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build":"browserifiy src/main.js -o index.js",
+    "dev":"budo src/main.js --serve bundle.js --live --open"
   },
   "repository": {
     "type": "git",
