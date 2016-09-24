@@ -5,8 +5,6 @@
   "main": "index.js",
   "dependencies": {
     "angular": "^1.5.8",
-    "browserify": "^13.1.0",
-    "budo": "^9.2.0",
     "pixi.js": "^4.0.2"
   },
   "devDependencies": {
@@ -15,7 +13,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserifiy src/main.js -o index.js",
+    "build": "rm -rf docs; mkdir docs; browserify src/main.js -o docs/bundle.js ; cp index.html docs/",
     "dev": "budo src/main.js --serve bundle.js --title 'IFCE 2016.1 - Sistemas Operacionais' --live --open"
   },
   "repository": {
