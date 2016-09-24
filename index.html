@@ -9,11 +9,12 @@
       margin: 0px;
       padding: 0px;
       overflow: scroll;
-      font-size:13px;
+      font-size: 13px;
     }
     
     #canvas,
-    #setup {
+    #setup,
+    #log {
       position: absolute;
       top: 0px;
       left: 0px;
@@ -25,19 +26,31 @@
     #setup {
       left: 600px;
       width: 320px;
-      padding:1px;
+      padding: 1px;
+    }
+    
+    #log {
+      left: 600px;
+      width: 320px;
+      padding: 1px;
+    }
+    
+    .fild {
+      width: 100%;
     }
 
-    .fild{
-      width:100%;
+    .scrollme{
+      overflow-y:scroll;
+      overflow-x:hide;
+      height:540px;
     }
   </style>
 </head>
 
-<body>
+<body ng-app="simulacao-memoria" ng-controller="configctl">
   <div id="canvas"></div>
-  <div id="setup" ng-app="simulacao-memoria" ng-controller="configctl" ng-cloak>
-    <h4>Configurações</h4>
+  <div id="setup" ng-hide="onlog">
+    <h4>Config</h4>
     <button ng-click="simulation.running=!simulation.running">
       {{simulation.running ? "STOP" : "START"}}
     </button>&nbsp;
@@ -45,62 +58,76 @@
       Restart
     </button>&nbsp;
     <button ng-click="simulation.addproc2queue(config)">
-      Add process to queue
+      Queue process
+    </button>&nbsp;
+    <button ng-click="showlog()">
+      Log
     </button>
     <br/>
-    <fieldset>
-      <legend>Strategy</legend>
-      <span ng-repeat="strat in config.strategies">
+    <div class="scrollme">
+      <fieldset>
+        <legend>Strategy</legend>
+        <span ng-repeat="strat in config.strategies">
         <label for="strategy[{{$index}}]">{{strat}}</label>  
         <input id="strategy[{{$index}}]" name="strategy" ng-value="strat" 
           type="radio" ng-model="simulation.strategy"/>
       </span>
-    </fieldset>
-    <fieldset>
-      <legend>Memory ranges (for new processes) </legend>
-      <label for="memin">Min</label>
-      <input id="memin" class="fild" type="number" 
-      ng-model="config.processmemoryrangemb[0]"/>
-      <label for="memax">Max</label>
-      <input id="memax" class="fild" type="number" 
-      ng-model="config.processmemoryrangemb[1]"/> 
-    </fieldset>
-    <fieldset>
-      <legend>Duration ranges (for new processes) </legend>
-      <label for="dumin">Min</label>
-      <input id="dumin" class="fild" type="number" 
-      ng-model="config.timeprocdurationrangesec[0]"/>
-      <label for="dumax">Max</label>
-      <input id="dumax" class="fild" type="number" 
-      ng-model="config.timeprocdurationrangesec[1]"/> 
-    </fieldset>
-    <fieldset>
-      <legend>Wait ranges (for new processes) </legend>
-      <label for="waitmin">Min</label>
-      <input id="waitmin" class="fild" type="number" 
-      ng-model="config.timeproccreationrangesec[0]"/>
-      <label for="waitmax">Max</label>
-      <input id="waitmax" class="fild" type="number" 
-      ng-model="config.timeproccreationrangesec[1]"/> 
-    </fieldset>
-    <fieldset>
-      <legend>OS size (needs restart) </legend>
-      <label for="sosize">Min</label>
-      <input id="sosize" class="fild" type="number" 
-      ng-model="config.sistopmemorymb"/>
-    </fieldset>
-    <fieldset>
-      <legend>Total RAM (needs restart) </legend>
-      <label for="ram">Min</label>
-      <input id="ram" class="fild" type="number" 
-      ng-model="config.memorysizemb"/>
-    </fieldset>
-    <fieldset>
-      <legend>Initial process queue (needs restart) </legend>
-      <label for="numprocesses">Min</label>
-      <input id="numprocesses" class="fild" type="number" 
-      ng-model="config.numprocesses"/>
-    </fieldset>
+      </fieldset>
+      <fieldset>
+        <legend>Memory ranges (for new processes) </legend>
+        <label for="memin">Min</label>
+        <input id="memin" class="fild" type="number" ng-model="config.processmemoryrangemb[0]" />
+        <label for="memax">Max</label>
+        <input id="memax" class="fild" type="number" ng-model="config.processmemoryrangemb[1]" />
+      </fieldset>
+      <fieldset>
+        <legend>Duration ranges (for new processes) </legend>
+        <label for="dumin">Min</label>
+        <input id="dumin" class="fild" type="number" ng-model="config.timeprocdurationrangesec[0]" />
+        <label for="dumax">Max</label>
+        <input id="dumax" class="fild" type="number" ng-model="config.timeprocdurationrangesec[1]" />
+      </fieldset>
+      <fieldset>
+        <legend>Wait ranges (for new processes) </legend>
+        <label for="waitmin">Min</label>
+        <input id="waitmin" class="fild" type="number" ng-model="config.timeproccreationrangesec[0]" />
+        <label for="waitmax">Max</label>
+        <input id="waitmax" class="fild" type="number" ng-model="config.timeproccreationrangesec[1]" />
+      </fieldset>
+      <fieldset>
+        <legend>OS size (needs restart) </legend>
+        <label for="sosize">Min</label>
+        <input id="sosize" class="fild" type="number" ng-model="config.sistopmemorymb" />
+      </fieldset>
+      <fieldset>
+        <legend>Total RAM (needs restart) </legend>
+        <label for="ram">Min</label>
+        <input id="ram" class="fild" type="number" ng-model="config.memorysizemb" />
+      </fieldset>
+      <fieldset>
+        <legend>Initial process queue (needs restart) </legend>
+        <label for="numprocesses">Min</label>
+        <input id="numprocesses" class="fild" type="number" ng-model="config.numprocesses" />
+      </fieldset>
+    </div>
+  </div>
+  <div id="log" ng-show="onlog">
+    <h4>Log</h4>
+    <button ng-click="hidelog()">
+      Hide log
+    </button>&nbsp;
+    <div class="scrollme">
+      <fieldset ng-repeat="p in pastprocess">
+        <legend>Process #{{p.key}} - {{p.finish_at - p.queued_at}} ms</legend>
+        <label>Queued</label>
+        <input class="fild" type="datetime-local" readonly ng-model="p.queued_at" /><br/>
+        <label>Allocation</label>
+        <input class="fild" type="datetime-local" readonly ng-model="p.created_at" /><br/>
+        <label>Finished</label>
+        <input class="fild" type="datetime-local" readonly ng-model="p.finish_at" /><br/>
+
+      </fieldset>
+    </div>
   </div>
   <script src="bundle.js"></script>
 </body>

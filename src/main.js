@@ -32,6 +32,7 @@ var simulation = {
   procseed: 100,
   running: false,
   processqueue: [],
+  finishedprocess: [],// needed to calculate average execution time
   physicalmemory: [],
   osmemory: [],
   memorymap: {},
@@ -97,11 +98,11 @@ var simulation = {
           // this not the time to allocate this one
           simulation.processqueue.push(proc);
         }
-        simulation.epqueue = false;
+        simulation.empqueue = false;
       } else {
-        if (!simulation.epqueue) {
+        if (!simulation.empqueue) {
           console.log("queue empty");
-          simulation.epqueue = true;
+          simulation.empqueue = true;
           // avoid endless print
         }
       }
@@ -113,11 +114,19 @@ var simulation = {
           // so this node has a process
           var pr = next.process;
           // check if the process finished to execute
-          if (pr.finish_at < new Date()) {
+          var d = new Date();
+          if (pr.finish_at <= d) {
+            // set the real finish moment
+            pr.finish_at = d;
             console.log("process ended: ")
-            console.log(pr);
+            // console.log(pr);
             util.releaseproc(simulation, next);
             simulation.lastnode = prev;
+            // keep it for logging
+            simulation.finishedprocess.push(pr);
+            // track only the last 100
+            if (simulation.finishedprocess.length > 100)
+              simulation.finishedprocess.shift();
           }
         }
         prev = next;
@@ -160,6 +169,16 @@ angular.module("simulacao-memoria", []).controller("configctl", function ($scope
   $scope.restart = function () {
     localStorage.setItem("config-simumemoria", JSON.stringify($scope.config));
     window.location.reload();
+  };
+
+  $scope.showlog = function () {
+    $scope.onlog = true;
+    $scope.pastprocess = simulation.finishedprocess;
+  };
+
+  $scope.hidelog = function () {
+    $scope.onlog = false;
+    delete $scope.pastprocess;
   };
 
 });

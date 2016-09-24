@@ -8,7 +8,7 @@ var style = {
   strokeThickness: 5
 };
 
-var processos = new PIXI.Text('Processos', style);
+var processos = new PIXI.Text('', style);
 
 var filaproc = new PIXI.Text('', {
   font: 'bold Mono 12px',
@@ -26,7 +26,7 @@ var memoproc = new PIXI.Text('', {
 
 exports.insert = function (stage, renderer) {
 
-  processos.x = 200;
+  processos.x = 100;
   processos.y = 50;
   stage.addChild(processos);
 
@@ -39,21 +39,23 @@ exports.insert = function (stage, renderer) {
   stage.addChild(memoproc);
 };
 
-exports.step = function (sim) {
+exports.step = function (sim, util) {
 
-  filaproc.text = "Processos na fila:\n";
-  if(sim.memoryfull)
-    filaproc.text+="<"+sim.memoryfull+">\n"
+  processos.text = "Avg. Time: " + util.calculatemediaespera(sim);
+
+  filaproc.text = "Process on queue:\n";
+  if (sim.memoryfull)
+    filaproc.text += "<" + sim.memoryfull + ">\n"
   var i = sim.processqueue.length;
   while (i--) {
     var p = sim.processqueue[i];
-    filaproc.text += "[PROCESS#"+p.key+"]\n";
-    filaproc.text += "Memory: " + p.memoryused+" MB\n";
-    filaproc.text += "Duration: " + p.duration_time/1000+" s\n";
-    filaproc.text += "Wait: " + p.creation_time/1000+" s\n";
+    filaproc.text += "[PROCESS#" + p.key + "]\n";
+    filaproc.text += "Memory: " + p.memoryused + " MB\n";
+    filaproc.text += "Duration: " + p.duration_time / 1000 + " s\n";
+    filaproc.text += "Wait: " + p.creation_time / 1000 + " s\n";
   }
 
-  memoproc.text = "Processos em execução:\n";
+  memoproc.text = "Running process:\n";
   var next = sim.memorymap;
   while (next) {
     if (next.label == "SO")
@@ -64,7 +66,7 @@ exports.step = function (sim) {
       var p = next.process;
       var ms = (new Date().getTime() - p.finish_at.getTime());
       var s = Math.floor(ms / 1000);
-      memoproc.text += "[PROCESS#"+p.key+"] T: " + s + " s "
+      memoproc.text += "[PROCESS#" + p.key + "] T: " + s + " s "
     }
     memoproc.text += next.memostart + " MB - " + next.memoend + " MB\n";
     next = next.next;

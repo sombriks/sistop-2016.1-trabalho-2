@@ -171,6 +171,17 @@ var utilities = {
       free: free,
       pct: (100 * (used / (used + free))).toFixed(0) + "%"
     }
+  },
+  calculatemediaespera: function (simu) {
+    if(simu.finishedprocess.length==0)
+      return " - ";
+    var i = simu.finishedprocess.length;
+    var tempos = 0;
+    while (i-- > 0) {
+      var p = simu.finishedprocess[i];
+      tempos += p.finish_at - p.queued_at;
+    }
+    return (tempos / simu.finishedprocess.length).toFixed(0) + " ms";
   }
 }
 
