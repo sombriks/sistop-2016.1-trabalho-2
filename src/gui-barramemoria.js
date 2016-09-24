@@ -21,15 +21,17 @@ exports.insert = function (stage, renderer) {
 
   pxwidth = renderer.width / 15;
 
-  titulomemoria.x = renderer.width / 20;
+  titulomemoria.x = 10;
   titulomemoria.y = 50;
-  barramemoria.position.x = renderer.width / 18;
+  barramemoria.position.x = 20;
   barramemoria.position.y = 100;
   stage.addChild(titulomemoria);
   stage.addChild(barramemoria);
 };
 
-exports.step = function (sim) {
+exports.step = function (sim,util) {
+
+  titulomemoria.text = util.calculateusedmemory(sim).pct;
 
   barramemoria.clear();
 
@@ -55,7 +57,7 @@ exports.step = function (sim) {
       barramemoria.beginFill(0x505050);
       barramemoria.drawRect(0, next.memostart * mbsize, pxwidth, procsize);
     } else if (next.process) {
-      var color = (next.process.created_at.getTime() % 0xAAAAAA) + 100;
+      var color = ((next.process.created_at.getTime()) % 0xAAAAAA) + 100;
       barramemoria.beginFill(color);
       barramemoria.drawRect(0, next.memostart * mbsize, pxwidth, procsize);
     }

@@ -1,0 +1,108 @@
+<html>
+
+<head>
+  <title>IFCE 2016.1 - Sistemas Operacionais</title>
+  <style>
+    body {
+      color: white;
+      background-color: black;
+      margin: 0px;
+      padding: 0px;
+      overflow: scroll;
+      font-size:13px;
+    }
+    
+    #canvas,
+    #setup {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 600x;
+      height: 640px;
+      border: 1px solid green;
+    }
+    
+    #setup {
+      left: 600px;
+      width: 320px;
+      padding:1px;
+    }
+
+    .fild{
+      width:100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="canvas"></div>
+  <div id="setup" ng-app="simulacao-memoria" ng-controller="configctl" ng-cloak>
+    <h4>Configurações</h4>
+    <button ng-click="simulation.running=!simulation.running">
+      {{simulation.running ? "STOP" : "START"}}
+    </button>&nbsp;
+    <button ng-click="restart()">
+      Restart
+    </button>&nbsp;
+    <button ng-click="simulation.addproc2queue(config)">
+      Add process to queue
+    </button>
+    <br/>
+    <fieldset>
+      <legend>Strategy</legend>
+      <span ng-repeat="strat in config.strategies">
+        <label for="strategy[{{$index}}]">{{strat}}</label>  
+        <input id="strategy[{{$index}}]" name="strategy" ng-value="strat" 
+          type="radio" ng-model="simulation.strategy"/>
+      </span>
+    </fieldset>
+    <fieldset>
+      <legend>Memory ranges (for new processes) </legend>
+      <label for="memin">Min</label>
+      <input id="memin" class="fild" type="number" 
+      ng-model="config.processmemoryrangemb[0]"/>
+      <label for="memax">Max</label>
+      <input id="memax" class="fild" type="number" 
+      ng-model="config.processmemoryrangemb[1]"/> 
+    </fieldset>
+    <fieldset>
+      <legend>Duration ranges (for new processes) </legend>
+      <label for="dumin">Min</label>
+      <input id="dumin" class="fild" type="number" 
+      ng-model="config.timeprocdurationrangesec[0]"/>
+      <label for="dumax">Max</label>
+      <input id="dumax" class="fild" type="number" 
+      ng-model="config.timeprocdurationrangesec[1]"/> 
+    </fieldset>
+    <fieldset>
+      <legend>Wait ranges (for new processes) </legend>
+      <label for="waitmin">Min</label>
+      <input id="waitmin" class="fild" type="number" 
+      ng-model="config.timeproccreationrangesec[0]"/>
+      <label for="waitmax">Max</label>
+      <input id="waitmax" class="fild" type="number" 
+      ng-model="config.timeproccreationrangesec[1]"/> 
+    </fieldset>
+    <fieldset>
+      <legend>OS size (needs restart) </legend>
+      <label for="sosize">Min</label>
+      <input id="sosize" class="fild" type="number" 
+      ng-model="config.sistopmemorymb"/>
+    </fieldset>
+    <fieldset>
+      <legend>Total RAM (needs restart) </legend>
+      <label for="ram">Min</label>
+      <input id="ram" class="fild" type="number" 
+      ng-model="config.memorysizemb"/>
+    </fieldset>
+    <fieldset>
+      <legend>Initial process queue (needs restart) </legend>
+      <label for="numprocesses">Min</label>
+      <input id="numprocesses" class="fild" type="number" 
+      ng-model="config.numprocesses"/>
+    </fieldset>
+  </div>
+  <script src="bundle.js"></script>
+</body>
+
+</html>

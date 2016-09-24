@@ -4,6 +4,7 @@
   "description": "\"this example shows how memory page allocations works\" ",
   "main": "index.js",
   "dependencies": {
+    "angular": "^1.5.8",
     "browserify": "^13.1.0",
     "budo": "^9.2.0",
     "pixi.js": "^4.0.2"

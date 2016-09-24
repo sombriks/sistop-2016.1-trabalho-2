@@ -39,30 +39,87 @@ var utilities = {
   },
   bestfit: function (proc, simu) {
     console.log("using best fit:");
-    return 1;
+    var next = simu.memorymap;
+    var best;
+    while (next) {
+      if (next.label == "free") {
+        if (next.memoend - next.memostart >= proc.memoryused) {
+          if (!best || (next.memoend - next.memostart < best.memoend - best.memostart)) {
+            best = next;
+          }
+        }
+      }
+      next = next.next;
+    }
+    if (best) {
+      utilities.mapproc(proc, simu, best);
+      simu.lastnode = best;
+      return 1;
+    }
+    console.log("there is no available memory");
+    return 0;
   },
   worstfit: function (proc, simu) {
     console.log("using worst fit:");
-    return 1;
+    var next = simu.memorymap;
+    var worst;
+    while (next) {
+      if (next.label == "free") {
+        if (next.memoend - next.memostart > proc.memoryused) {
+          if (!worst || (next.memoend - next.memostart > worst.memoend - worst.memostart)) {
+            worst = next;
+          }
+        }
+      }
+      next = next.next;
+    }
+    if (worst) {
+      utilities.mapproc(proc, simu, worst);
+      simu.lastnode = worst;
+      return 1;
+    }
+    console.log("there is no available memory");
+    return 0;
   },
   nextfit: function (proc, simu) {
     console.log("using next fit:");
-    return 1;
+    var next = simu.lastnode;
+    var worst;
+    while (next) {
+      if (next.label == "free") {
+        if (next.memoend - next.memostart > proc.memoryused) {
+          if (!worst || (next.memoend - next.memostart > worst.memoend - worst.memostart)) {
+            worst = next;
+          }
+        }
+      }
+      next = next.next;
+    }
+    if (worst) {
+      utilities.mapproc(proc, simu, worst);
+      simu.lastnode = worst;
+      return 1;
+    } else {
+      // put lastnode in the begining
+      simul.lastnode = simu.memorymap;
+    }
+    console.log("there is no available memory");
+    return 0;
   },
   mapproc: function (proc, simu, nodemap) {
     // assume nodemap is free and proc fits on the node
-    nodemap.label = "proc-" + proc.created_at;
+    nodemap.label = "proc#" + proc.key;
     nodemap.process = proc;
-    proc.nodemap=nodemap;
+    proc.nodemap = nodemap;
     // allocate
     var i = nodemap.memostart + proc.memoryused;
-    while (i--) {
+    while (i-- > nodemap.memostart) {
       simu.physicalmemory[i].free = false;
     }
     // check if there is remaining memory
     if (nodemap.memoend > nodemap.memostart + proc.memoryused) {
       var newnode = {
-        memostart: nodemap.memostart + proc.memoryused,
+        memostart: nodemap.memostart + proc.memoryused + 1,
         memoend: nodemap.memoend,
         label: "free",
       };
@@ -74,28 +131,45 @@ var utilities = {
     }
   },
   releaseproc: function (simu, nodemap) {
-    nodemap.label = "free"
     var i = nodemap.memoend;
     while (i-- > nodemap.memostart) {
       simu.physicalmemory[i].free = true;
     }
     delete nodemap.process.nodemap;
     delete nodemap.process;
+    nodemap.label = "free"
   },
   freememory: function (simu) {
-    var next = simulation.memorymap;
-    var prev = simulation.memorymap;
+    var next = simu.memorymap.next;
+    var prev = simu.memorymap;
     while (next) {
       if (prev != next && prev.label == "free" && next.label == "free") {
         prev.memoend = next.memoend;
         prev.next = next.next;
         next = prev;
+        delete next.process;
         // free memory merged
         console.log("free memory merged: ");
-        console.log(next);
+        // console.log(next);
       }
       prev = next;
       next = next.next;
+    }
+  },
+  calculateusedmemory: function (simu) {
+    var used = 0;
+    var free = 0;
+    var i = simu.physicalmemory.length;
+    while (i--) {
+      if (simu.physicalmemory[i].free)
+        free++;
+      else
+        used++;
+    }
+    return {
+      used: used,
+      free: free,
+      pct: (100 * (used / (used + free))).toFixed(0) + "%"
     }
   }
 }
