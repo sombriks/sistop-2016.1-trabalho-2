@@ -55,7 +55,7 @@ exports.step = function (sim) {
       barramemoria.beginFill(0x505050);
       barramemoria.drawRect(0, next.memostart * mbsize, pxwidth, procsize);
     } else if (next.process) {
-      var color = next.process.created_at.getTime() % 0xAAAAAA + 100;
+      var color = (next.process.created_at.getTime() % 0xAAAAAA) + 100;
       barramemoria.beginFill(color);
       barramemoria.drawRect(0, next.memostart * mbsize, pxwidth, procsize);
     }
