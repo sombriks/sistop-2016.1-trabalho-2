@@ -52,6 +52,8 @@ var utilities = {
   mapproc: function (proc, simu, nodemap) {
     // assume nodemap is free and proc fits on the node
     nodemap.label = "proc-" + proc.created_at;
+    nodemap.process = proc;
+    proc.nodemap=nodemap;
     // allocate
     var i = nodemap.memostart + proc.memoryused;
     while (i--) {
@@ -64,11 +66,36 @@ var utilities = {
         memoend: nodemap.memoend,
         label: "free",
       };
-      nodemap.memoend = nodemap.memostart + proc.memoryused - 1;
+      nodemap.memoend = nodemap.memostart + proc.memoryused;
       // time to link it back
       if (nodemap.next)
         newnode.next = nodemap.next;
       nodemap.next = newnode;
+    }
+  },
+  releaseproc: function (simu, nodemap) {
+    nodemap.label = "free"
+    var i = nodemap.memoend;
+    while (i-- > nodemap.memostart) {
+      simu.physicalmemory[i].free = true;
+    }
+    delete nodemap.process.nodemap;
+    delete nodemap.process;
+  },
+  freememory: function (simu) {
+    var next = simulation.memorymap;
+    var prev = simulation.memorymap;
+    while (next) {
+      if (prev != next && prev.label == "free" && next.label == "free") {
+        prev.memoend = next.memoend;
+        prev.next = next.next;
+        next = prev;
+        // free memory merged
+        console.log("free memory merged: ");
+        console.log(next);
+      }
+      prev = next;
+      next = next.next;
     }
   }
 }
